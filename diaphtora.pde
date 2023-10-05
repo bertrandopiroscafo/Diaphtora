@@ -1,28 +1,3 @@
-/*
-MIT License
-
-Copyright (c) 2023 Bertrand GILLES-CHATELETS
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // διαφθορά@bertrandopiroscafo
 // Dec 2020
@@ -103,7 +78,7 @@ void setup() {
   size(810, 710);
   background(0);
   
-  surface.setTitle("διαφθορά@bertrandopiroscafo V1.1 Build 210419");
+  surface.setTitle("διαφθορά V1.0 2023 by @bertrandopiroscafo");
   
   // MMI
   _controlP5 = new ControlP5(this);
@@ -268,6 +243,7 @@ void processImage() {
     }
     
     image(_img, 0,0, _img.width, _img.height);
+    //image(_img, 0,0, 810, 710);
   }
   catch (Exception e){
    System.out.println("JPEG READER CRASHED !!"); 
@@ -613,7 +589,7 @@ void watermark() {
     {
       pg.fill(255,0,0);
       pg.textSize(15);
-      pg.text("BGC 2021", _img.width - 75, _img.height - 5);
+      pg.text("BGC 2023", _img.width - 75, _img.height - 5);
     }
     pg.endDraw();
     pg.save("./SAVE/"+_fn+'_'+(_incursionDepthValue)+' '+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
