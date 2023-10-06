@@ -27,6 +27,9 @@ SOFTWARE.
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 import controlP5.*;
 import themidibus.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 
 String _fno = "./TEMP/corrupted_output.jpg";
 String _fn  = "m33_p128.jpg";
@@ -252,8 +255,12 @@ void processImage() {
   } 
   try
   {
+    //long t = System.nanoTime();
     saveBytes(_fno, _b);  
-    _img = loadImage(_fno);
+    _img = loadImage(_fno);   
+    //_img = bufferedImageToPImage(byteArrayToBufferedImage(_b)); // slower than with disk access !!!
+    //t = System.nanoTime() - t;
+    //println("Elapsed time (milliseconds) " + t / 1000000);
    
     if (_isFX == true)
     {
@@ -269,7 +276,7 @@ void processImage() {
     //image(_img, 0,0, 810, 710);
   }
   catch (Exception e){
-   System.out.println("JPEG READER CRASHED !!"); 
+   //System.out.println("JPEG READER CRASHED !!"); 
   }
 }
 
@@ -316,6 +323,24 @@ void alternate(int i)
          break;
   }
 }
+
+BufferedImage byteArrayToBufferedImage(byte[] data)
+{
+    InputStream in = new ByteArrayInputStream(data);
+    try {
+           BufferedImage wrackedImage = ImageIO.read(in);
+           return wrackedImage;
+    } catch (IOException e) {
+          //e.printStackTrace();
+    }
+      
+    return null;
+}
+  
+PImage bufferedImageToPImage(BufferedImage bufferedImage)
+  {
+    return new PImage(bufferedImage);
+  }
 
 // ===================================================
 // MMI
