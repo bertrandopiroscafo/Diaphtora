@@ -29,6 +29,7 @@ import controlP5.*;
 import themidibus.*;
 
 String _fno = "./TEMP/corrupted_output.jpg";
+String _fnResized = "./TEMP/original_resized.jpg";
 String _fn  = "m33_p128.jpg";
 PImage _img;
 
@@ -462,12 +463,22 @@ void fileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } else {
     println("User selected " + selection.getAbsolutePath());
-    _b_orig = loadBytes(selection.getAbsolutePath());
+    PImage img = loadImage(selection.getAbsolutePath()); // using _img DOES NO WORK
+    
+    if (img.width > img.height)
+    {
+      img.resize(800, 0);
+    }
+    else 
+    {
+      img.resize(0, 600);
+    }
+    img.save(_fnResized);
+    _b_orig = loadBytes(_fnResized);
     _fn = selection.getName();
     _b = new byte[_b_orig.length];    
   }
 }
-
 // ==================================================
 // MIDI
 // ==================================================
@@ -611,8 +622,8 @@ void watermark() {
     if (_isMarked == true)
     {
       pg.fill(255,0,0);
-      pg.textSize(15);
-      pg.text("BGC 2023", _img.width - 75, _img.height - 5);
+      pg.textSize(10);
+      pg.text("@bertrandopiroscafo", _img.width - 120, _img.height - 5);
     }
     pg.endDraw();
     pg.save("./SAVE/"+_fn+'_'+(_incursionDepthValue)+' '+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
@@ -629,9 +640,9 @@ void watermarkForScan() {
     pg.beginDraw();
     pg.copy(_img, 0 , 0, _img.width, _img.height, 0, 0, _img.width, _img.height);
     pg.fill(255,0,0);
-    pg.textSize(15);
+    pg.textSize(10);
     pg.text(str(++_numScan)+'/'+"256", 0, _img.height - 5);
-    pg.text("BGC 2023", _img.width - 75, _img.height - 5);
+    pg.text("@bertrandopiroscafo", _img.width - 120, _img.height - 5);
     pg.endDraw();
     pg.save("./SAVE/"+_numScan+'_'+_fn+'_'+(_incursionDepthValue)+'_'+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
     //pg.save("./SAVE/"+_numScan+'_'+_fn+'_'+(_incursionDepthValue)+'_'+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo"); // No suffix -> TIFF
