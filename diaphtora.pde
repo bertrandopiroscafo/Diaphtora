@@ -1,38 +1,46 @@
-/*
-MIT License
+//MIT License
+//
+//Copyright (c) 2023 Bertrand GILLES-CHATELETS
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
 
-Copyright (c) 2023 Bertrand GILLES-CHATELETS
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//
 // διαφθορά@bertrandopiroscafo
+// V1.1
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 import controlP5.*;
 import themidibus.*;
+import processing.awt.PSurfaceAWT;
+import javax.swing.JFrame;
 
+//-----------------------------------------------------
+// global variables
+//-----------------------------------------------------
 String _fno = "./TEMP/corrupted_output.jpg";
 String _fnResized = "./TEMP/original_resized.jpg";
 String _fn  = "m33_p128.jpg";
 PImage _img;
 
+// GUI
 ControlP5 _controlP5;
 Slider _depthSlider;
 Slider _byteSlider;
@@ -85,14 +93,17 @@ boolean _isBW = false;
 boolean _isMarked = true;
 int _numScan = 0;
 
-
+// MIDI
 MidiBus _myBus; // The MidiBus
+// customize these parameters for your needs
 final int _CC_CHANNEL = 0;
-final int _CC_CV1 = 0;
-final int _CC_CV2 = 1;
-final int _CC_CV3 = 2;
-final int _CC_CV4 = 3;
-int _numberOfNotesHolded = 0;
+final int _CC_CV1 = 71;
+final int _CC_CV2 = 72;
+final int _CC_CV3 = 73;
+final int _CC_CV4 = 74;
+
+// Internal JAVA Frame
+JFrame frame;
 
 // ===================================================
 // Setup
@@ -100,11 +111,40 @@ int _numberOfNotesHolded = 0;
 void setup() {
   
   size(810, 710);
-  background(0);
   
-  surface.setTitle("διαφθορά V1.0 2023 by @bertrandopiroscafo");
+  // Surface
+  initializeSurface();
   
   // MMI
+  buildMMI();
+  
+  // MIDI
+  initializeMIDI();
+ 
+  // Init Params
+  setDefaultParameters();
+}
+
+//==================================================
+// initializeSurface
+//==================================================
+void initializeSurface()
+{
+  background(0);
+  
+  // Workaround for avoiding a null pointer on exit
+  // when using the midibus with Processing4
+  frame = getJFrame();
+  frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+  
+  surface.setTitle("διαφθορά V1.1 2023 by @bertrandopiroscafo");
+}
+
+//===================================================
+// buildMMI
+//===================================================
+void buildMMI()
+{
   _controlP5 = new ControlP5(this);
   _incursionDepthSlider = _controlP5.addSlider("incursion")
  .setRange(INCURSION_MIN, INCURSION_MAX)
@@ -188,26 +228,28 @@ void setup() {
  .setValue(0.5)
  .setPosition(700,680)
  .setSize(100,10);
- 
- /*
-  textSize(36);
-  fill(255,0,0);
-  text("Brigitte's Ring ", 10,520);
-  text("CoRRupTeD DaTA", 10,560);
-  text("@bertrandopiroscafo ", 10,600);
- */
-  
-  setDefaultParameters();
- 
-  // load default file
-  //_b_orig = loadBytes("./DATA/m33_p128.jpg");
-  _b_orig = loadBytes("./DATA/"+_fn);
-  _b = new byte[_b_orig.length];
-  
-  // MIDI initialization
+}
+
+//===================================================
+//  MIDI initialization
+//===================================================
+void initializeMIDI() 
+{
   MidiBus.list(); 
-  _myBus = new MidiBus(this, "USB MIDI Interface", -1);
-  //_myBus = new MidiBus(this, "iRig KEYS Pro", -1);
+  // uncomment this line for using MIDI and install the following release of themidibus
+  // https://github.com/micycle1/themidibus/releases/tag/p4
+  // otherwise, you will get a null pointer exception
+  //_myBus = new MidiBus(this, "BGC DRUM KIT", -1); // set here your MIDI Device name
+  
+ 
+}
+//===================================================
+// Get the internal JFrame
+//===================================================
+JFrame getJFrame() {
+  PSurfaceAWT surf = (PSurfaceAWT) getSurface();
+  PSurfaceAWT.SmoothCanvas canvas = (PSurfaceAWT.SmoothCanvas) surf.getNative();
+  return (JFrame) canvas.getFrame();
 }
 
 // ===================================================
@@ -227,6 +269,7 @@ void draw() {
   }
   processImage();
   watermark();
+  surface.setTitle("διαφθορά V1.1 2023 by @bertrandopiroscafo - FPS: " + Math.round(frameRate));
 }
 
 // ===================================================
@@ -267,7 +310,6 @@ void processImage() {
     }
     
     image(_img, 0,0, _img.width, _img.height);
-    //image(_img, 0,0, 810, 710);
   }
   catch (Exception e){
    System.out.println("JPEG READER CRASHED !!"); 
@@ -319,7 +361,7 @@ void alternate(int i)
 }
 
 // ===================================================
-// MMI
+// MMI Event Handler
 // ===================================================
 void controlEvent(ControlEvent theEvent) 
 {
@@ -340,7 +382,6 @@ void controlEvent(ControlEvent theEvent)
   if (theEvent.getController().getName()=="incursion") 
   {
      _incursionDepthValue = (int)theEvent.getController().getValue();
-     //println("incrusion = "+ _incursionDepthValue);
   }
   if (theEvent.getController().getName()=="animate") 
   {
@@ -458,6 +499,9 @@ void controlEvent(ControlEvent theEvent)
  }
 }
 
+// ==================================================
+// File Selector
+// ==================================================
 void fileSelected(File selection) {
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
@@ -480,7 +524,7 @@ void fileSelected(File selection) {
   }
 }
 // ==================================================
-// MIDI
+// MIDI CC Handler
 // ==================================================
 void controllerChange(int channel, int number, int value) {
   
@@ -488,7 +532,7 @@ void controllerChange(int channel, int number, int value) {
   {
     if (value >= 0 && value <= 127)
     {
-      _depthValue = (int)map(value, 0, 127, DEPTH_MIN, DEPTH_MAX);
+      _depthValue = (int)map(value, 0, 127, DEPTH_MAX, DEPTH_MIN); // FX is inverse rising to CC
       _depthSlider.setValue(_depthValue);
     }
   }
@@ -512,49 +556,13 @@ void controllerChange(int channel, int number, int value) {
   {
     if (value >= 0 && value <= 127)
     {
-      _incursionDepthValue = (int)map(value, 0, 127, INCURSION_MIN, INCURSION_MAX);
+      _incursionDepthValue = (int)map(value, 0, 127, INCURSION_MAX, INCURSION_MIN); //FX is inverse rising to CC
       _incursionDepthSlider.setValue(_incursionDepthValue);
     }
   }
 }
 
-// for check purpose
-/*void noteOn(Note note) {
-  println(note.toString());
-}*/
 
-// Avec l'algorithme OR (2), on peut visualiser un accord avec une 
-// visualisation unique indépendante de l'ordre de frappe des touches !
-// ex Tonique OR Tierce OR Quinte
-
-void noteOn(int channel, int pitch, int velocity) {
-  
-  if (pitch >= 0 && pitch <= 127 && velocity >= 0 && velocity <= 127) 
-  {
-    //println("pitch = ", pitch);
-    //println("velocity = ", velocity);
-   
-    _numberOfNotesHolded++;
-    //_byteValue = (byte)map(pitch, 0, 127, BYTE_MIN, BYTE_MAX);
-    //_byteSlider.setValue(_byteValue);
-    _depthValue = (int)map(pitch, 0, 127, DEPTH_MIN, DEPTH_MAX);
-    _depthSlider.setValue(_depthValue);
-  }
-}
-
-void noteOff(int channel, int pitch, int velocity) {
-  
-   if (pitch >= 0 && pitch <= 127 && velocity >= 0 && velocity <= 127) 
-   {
-     if (--_numberOfNotesHolded == 0)
-     {
-      //_byteValue = 0; 
-      //_byteSlider.setValue(_byteValue);
-      _depthValue = (DEPTH_MIN + DEPTH_MAX) / 2; 
-      _depthSlider.setValue(_depthValue);
-     }
-   }
-}
 
 // =======================================================
 // Default parameters
@@ -571,6 +579,10 @@ void setDefaultParameters() {
   _incursionDepthSlider.setValue(_incursionDepthValue);
   _bwThresholdValue = 0.5;
   _bwThresholdSlider.setValue(_bwThresholdValue);
+  
+  // load default file
+  _b_orig = loadBytes("./DATA/"+_fn);
+  _b = new byte[_b_orig.length];
 }
 
 // =======================================================
@@ -627,7 +639,6 @@ void watermark() {
     }
     pg.endDraw();
     pg.save("./SAVE/"+_fn+'_'+(_incursionDepthValue)+' '+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
-    //pg.save("./SAVE/"+_fn+'_'+(_incursionDepthValue)+' '+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo"); // No suffix -> TIFF
     _isSaving = false;
   }
 }
@@ -645,7 +656,6 @@ void watermarkForScan() {
     pg.text("@bertrandopiroscafo", _img.width - 120, _img.height - 5);
     pg.endDraw();
     pg.save("./SAVE/"+_numScan+'_'+_fn+'_'+(_incursionDepthValue)+'_'+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
-    //pg.save("./SAVE/"+_numScan+'_'+_fn+'_'+(_incursionDepthValue)+'_'+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo"); // No suffix -> TIFF
     _isSaving = false;
   }
 }
@@ -737,6 +747,9 @@ void displayControl(boolean show)
    }
 }
 
+//====================================================
+// shortcuts
+//====================================================
 void keyPressed() {
   if (key == 's') {
     displayControl(true); //<>//
