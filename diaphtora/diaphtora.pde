@@ -101,6 +101,7 @@ final int _CC_CV1 = 71;
 final int _CC_CV2 = 72;
 final int _CC_CV3 = 73;
 final int _CC_CV4 = 74;
+final int _CC_CV5 = 75;
 
 // Internal JAVA Frame
 JFrame frame;
@@ -240,7 +241,7 @@ void initializeMIDI()
   // https://github.com/micycle1/themidibus/releases/tag/p4
   // otherwise, you will get a null pointer exception
   //_myBus = new MidiBus(this, "BGC DRUM KIT", -1); // set here your MIDI Device name
-  
+  _myBus = new MidiBus(this, 1, -1); // set here your MIDI Device name
  
 }
 //===================================================
@@ -527,6 +528,7 @@ void fileSelected(File selection) {
 // MIDI CC Handler
 // ==================================================
 void controllerChange(int channel, int number, int value) {
+  println("CC RECEIVED !!!");
   
   if (number == _CC_CV1)
   {
@@ -558,6 +560,17 @@ void controllerChange(int channel, int number, int value) {
     {
       _incursionDepthValue = (int)map(value, 0, 127, INCURSION_MAX, INCURSION_MIN); //FX is inverse rising to CC
       _incursionDepthSlider.setValue(_incursionDepthValue);
+    }
+  }
+  if (number == _CC_CV5)
+  {
+    if (value == 1)
+    {
+      _isAnimated = true;
+    }
+    if (value == 0)
+    {
+      _isAnimated = false;
     }
   }
 }
@@ -634,11 +647,21 @@ void watermark() {
     if (_isMarked == true)
     {
       pg.fill(255,0,0);
-      pg.textSize(10);
-      pg.text("@bertrandopiroscafo", _img.width - 120, _img.height - 5);
+      pg.textSize(30);
+      //pg.text("@bertrandopiroscafo", _img.width - 120, _img.height - 5);
+      //pg.text((_incursionDepthValue)+'/'+(_depthValue)+'/'+(_byteValue)+'/'+(_algorithmValue)+' '+"@bertrandopiroscafo", 300, 300);
+      String s = Integer.toString(_incursionDepthValue);
+      s+='/';
+      s+= Integer.toString(_depthValue);
+      s+='/';
+      s+= Integer.toString(_byteValue);
+      s+='/';
+      s+= Integer.toString(_algorithmValue);
+      s+= "@bertrandopiroscafo";
+      pg.text(s, 10, _img.height - 10);
     }
     pg.endDraw();
-    pg.save("./SAVE/"+_fn+'_'+(_incursionDepthValue)+' '+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
+    pg.save("./SAVE/"+_fn+'_'+(_incursionDepthValue)+'_'+(_depthValue)+'_'+(_byteValue)+'_'+(_algorithmValue)+"@bertrandopiroscafo.jpg");
     _isSaving = false;
   }
 }
@@ -724,6 +747,7 @@ void displayControl(boolean show)
      _fxToggle.show();
      _bwToggle.show();
      _bwThresholdSlider.show();
+     _signatureToggle.show();
    }
    else
    {
@@ -744,6 +768,7 @@ void displayControl(boolean show)
      _fxToggle.hide();
      _bwToggle.hide();
      _bwThresholdSlider.hide();
+     _signatureToggle.hide();
    }
 }
 
@@ -752,7 +777,7 @@ void displayControl(boolean show)
 //====================================================
 void keyPressed() {
   if (key == 's') {
-    displayControl(true); //<>//
+    displayControl(true);
   }
   if (key == 'h') {
     displayControl(false);
