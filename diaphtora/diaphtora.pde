@@ -1,6 +1,6 @@
-//MIT License
+// MIT License
 //
-//Copyright (c) 2023 Bertrand GILLES-CHATELETS
+// Copyright (c) 2023-2006 Bertrand GILLES-CHATELETS (@bertrandopiroscafo)
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,8 @@
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //
 // διαφθορά@bertrandopiroscafo
-// V1.1
+// V1.2
+//
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 import controlP5.*;
@@ -36,9 +37,11 @@ import javax.swing.JFrame;
 // global variables
 //-----------------------------------------------------
 String _fno = "./TEMP/corrupted_output.jpg";
-String _fnResized = "./TEMP/original_resized.jpg";
-String _fn  = "m33_p128.jpg";
+//String _fnResized = "./TEMP/original_resized.jpg";
+//String _fn  = "m33_p128.jpg";
+String _fn = "sable_moyen.jpg";
 PImage _img;
+PImage _imgCopy;
 
 // GUI
 ControlP5 _controlP5;
@@ -60,6 +63,10 @@ Toggle _fxToggle;
 Toggle _noiseToggle;
 Toggle _bwToggle;
 Toggle _signatureToggle;
+Numberbox _incursionNumberbox;
+Numberbox _depthNumberbox;
+Numberbox _byteNumberbox;
+Numberbox _algoNumberbox;
 
 int  _depthValue = 0;
 byte _byteValue = 0;
@@ -138,7 +145,7 @@ void initializeSurface()
   frame = getJFrame();
   frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   
-  surface.setTitle("διαφθορά V1.1 2023 by @bertrandopiroscafo");
+  surface.setTitle("διαφθορά V1.2 2023-2026 by @bertrandopiroscafo");
 }
 
 //===================================================
@@ -229,6 +236,21 @@ void buildMMI()
  .setValue(0.5)
  .setPosition(700,680)
  .setSize(100,10);
+
+ _incursionNumberbox = _controlP5.addNumberbox("inc")
+     .setPosition(650,10)
+     .setSize(100,20)
+     .setScrollSensitivity(1.1)
+     .setValue(50)
+     ;
+     
+ _depthNumberbox = _controlP5.addNumberbox("dph")
+     .setPosition(650,60)
+     .setSize(100,20)
+     .setScrollSensitivity(1.1)
+     .setValue(50)
+     ;
+     
 }
 
 //===================================================
@@ -270,7 +292,7 @@ void draw() {
   }
   processImage();
   watermark();
-  surface.setTitle("διαφθορά V1.1 2023 by @bertrandopiroscafo - FPS: " + Math.round(frameRate));
+  surface.setTitle("διαφθορά V1.2 2023-2026 by @bertrandopiroscafo - FPS: " + Math.round(frameRate));
 }
 
 // ===================================================
@@ -309,8 +331,13 @@ void processImage() {
     {
       bw();
     }
-    
-    image(_img, 0,0, _img.width, _img.height);
+    // BGC 260708
+    _imgCopy = _img.copy();
+    //_imgCopy.copy(0, 0, _img.width,  _img.height, 0, 0, _img.width, _img.height);
+    _imgCopy.resize(600, 600);
+    image(_imgCopy, 0,0, _imgCopy.width, _imgCopy.height);
+  
+    //image(_img, 0,0, _img.width, _img.height);
   }
   catch (Exception e){
    System.out.println("JPEG READER CRASHED !!"); 
@@ -371,6 +398,7 @@ void controlEvent(ControlEvent theEvent)
   if (theEvent.getController().getName()=="depth") 
   {
      _depthValue = (int)theEvent.getController().getValue(); 
+     _depthNumberbox.setValue(_depthValue);
   }
   if (theEvent.getController().getName()=="byte") 
   {
@@ -383,6 +411,7 @@ void controlEvent(ControlEvent theEvent)
   if (theEvent.getController().getName()=="incursion") 
   {
      _incursionDepthValue = (int)theEvent.getController().getValue();
+     _incursionNumberbox.setValue(_incursionDepthValue);
   }
   if (theEvent.getController().getName()=="animate") 
   {
@@ -497,6 +526,16 @@ void controlEvent(ControlEvent theEvent)
         _isMarked = false; 
      }
   }
+  if (theEvent.getController().getName()=="inc") 
+  {
+     _incursionDepthValue = (int)theEvent.getController().getValue();
+     _incursionDepthSlider.setValue(_incursionDepthValue );
+  }
+  if (theEvent.getController().getName()=="dph") 
+  {
+     _depthValue = (int)theEvent.getController().getValue(); 
+     _depthSlider.setValue(_depthValue );
+  }
  }
 }
 
@@ -508,8 +547,14 @@ void fileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } else {
     println("User selected " + selection.getAbsolutePath());
-    PImage img = loadImage(selection.getAbsolutePath()); // using _img DOES NO WORK
-    
+    PImage img = loadImage(selection.getAbsolutePath()); // using _img DOES NOT WORK
+  /*
+    if (img.width > 600 && img.height > 600)
+    {
+       img.resize(600,600);
+    }
+*/
+    /*
     if (img.width > img.height)
     {
       img.resize(800, 0);
@@ -518,8 +563,12 @@ void fileSelected(File selection) {
     {
       img.resize(0, 600);
     }
+    
     img.save(_fnResized);
-    _b_orig = loadBytes(_fnResized);
+    
+    */
+    //_b_orig = loadBytes(_fnResized);
+    _b_orig = loadBytes(selection.getAbsolutePath()); //260708
     _fn = selection.getName();
     _b = new byte[_b_orig.length];    
   }
