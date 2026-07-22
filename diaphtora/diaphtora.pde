@@ -63,10 +63,11 @@ Toggle _fxToggle;
 Toggle _noiseToggle;
 Toggle _bwToggle;
 Toggle _signatureToggle;
-Numberbox _incursionNumberbox;
-Numberbox _depthNumberbox;
-Numberbox _byteNumberbox;
-Numberbox _algoNumberbox;
+//Numberbox _incursionNumberbox;
+//Numberbox _depthNumberbox;
+//Numberbox _byteNumberbox;
+//Numberbox _algoNumberbox;
+Textfield _paramsTextfield;
 
 int  _depthValue = 0;
 byte _byteValue = 0;
@@ -236,7 +237,7 @@ void buildMMI()
  .setValue(0.5)
  .setPosition(700,680)
  .setSize(100,10);
-
+/*
  _incursionNumberbox = _controlP5.addNumberbox("inc")
      .setPosition(650,10)
      .setSize(100,20)
@@ -250,7 +251,13 @@ void buildMMI()
      .setScrollSensitivity(1.1)
      .setValue(50)
      ;
-     
+*/
+ _paramsTextfield = _controlP5.addTextfield("params")
+     .setPosition(650,10)
+     .setSize(100,20)
+     .setFocus(true)
+     .setColor(color(0,255,0))
+     ;  
 }
 
 //===================================================
@@ -389,6 +396,23 @@ void alternate(int i)
 }
 
 // ===================================================
+// set parameters fine grain
+// ===================================================
+void setParameters(String params) {
+  
+   String[] param = params.split(",");
+   /*  for (String y : param) {
+      System.out.println(y);
+    }*/
+   if ( param.length == 4) {
+    // System.out.println("OK");
+    _incursionDepthValue = Integer.valueOf(param[0]);
+    _depthValue = Integer.valueOf(param[1]);
+    _byteValue = Byte.valueOf(param[2]);
+    _algorithmValue = Integer.valueOf(param[3]);
+   } 
+}
+
 // MMI Event Handler
 // ===================================================
 void controlEvent(ControlEvent theEvent) 
@@ -397,8 +421,9 @@ void controlEvent(ControlEvent theEvent)
  { 
   if (theEvent.getController().getName()=="depth") 
   {
+    //System.out.println("DEPTH CALLED !!!");
      _depthValue = (int)theEvent.getController().getValue(); 
-     _depthNumberbox.setValue(_depthValue);
+     //_depthNumberbox.setValue(_depthValue);
   }
   if (theEvent.getController().getName()=="byte") 
   {
@@ -410,8 +435,9 @@ void controlEvent(ControlEvent theEvent)
   }
   if (theEvent.getController().getName()=="incursion") 
   {
+     System.out.println("INCURSION CALLED !!!");
      _incursionDepthValue = (int)theEvent.getController().getValue();
-     _incursionNumberbox.setValue(_incursionDepthValue);
+     //_incursionNumberbox.setValue(_incursionDepthValue);
   }
   if (theEvent.getController().getName()=="animate") 
   {
@@ -444,10 +470,14 @@ void controlEvent(ControlEvent theEvent)
     if (_shiftMode == false)
     {   
      --_depthValue;
+     //_depthNumberbox.setValue(_depthValue);
+     //_depthSlider.setValue(_depthValue);
     }
     else 
     {
      --_incursionDepthValue;
+     //_incursionNumberbox.setValue(_incursionDepthValue);
+     //_incursionDepthSlider.setValue(_incursionDepthValue);
     }
   }
   if (theEvent.getController().getName()=="fwd") 
@@ -456,10 +486,14 @@ void controlEvent(ControlEvent theEvent)
     if (_shiftMode == false)
     {
      ++_depthValue;
+     //_depthNumberbox.setValue(_depthValue);
+     //_depthSlider.setValue(_depthValue);
     }
     else 
     {
      ++_incursionDepthValue;
+     //_incursionNumberbox.setValue(_incursionDepthValue);
+     //_incursionDepthSlider.setValue(_incursionDepthValue);
     }
   }
   if (theEvent.getController().getName()=="file") 
@@ -528,13 +562,22 @@ void controlEvent(ControlEvent theEvent)
   }
   if (theEvent.getController().getName()=="inc") 
   {
-     _incursionDepthValue = (int)theEvent.getController().getValue();
-     _incursionDepthSlider.setValue(_incursionDepthValue );
+     //_incursionDepthValue = (int)theEvent.getController().getValue();
+     //_incursionDepthSlider.setValue(_incursionDepthValue );
   }
   if (theEvent.getController().getName()=="dph") 
   {
-     _depthValue = (int)theEvent.getController().getValue(); 
-     _depthSlider.setValue(_depthValue );
+     //_depthValue = (int)theEvent.getController().getValue(); 
+     //_depthSlider.setValue(_depthValue );
+  }
+  if (theEvent.getController().getName()=="params") 
+  {
+     println("controlEvent: accessing a string from controller '"
+            +theEvent.getName()+"': "
+            +theEvent.getStringValue()
+            );
+           
+    setParameters(theEvent.getStringValue());
   }
  }
 }
@@ -690,6 +733,9 @@ void watermark() {
  
   if (_isSaving == true)
   {
+    //PImage imgCopy = _img.copy();
+    //imgCopy.resize(_img.width * 4, _img.height * 4);
+    //PGraphics pg = createGraphics(imgCopy.width , imgCopy.height);
     PGraphics pg = createGraphics(_img.width , _img.height);
     pg.beginDraw();
     pg.copy(_img, 0 , 0, _img.width, _img.height, 0, 0, _img.width, _img.height);
